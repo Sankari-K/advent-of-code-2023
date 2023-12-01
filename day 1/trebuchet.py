@@ -2,35 +2,33 @@ DIGITS = {"one": "1", "two": "2", "three": "3", "four": "4", "five": "5", "six":
 
 def get_puzzle_input(directory):
     """
-    Given a directory, this function reads the input and returns it as a list
+    Given a directory, parses and returns input as a list
     """
     with open(directory) as f:
-        return f.read().split("\n")
+        return f.readlines()
 
-def modify_input(puzzle):
+def modify_input(lines):
     """
-    Given a list of lines, it transforms digits into letters for each line
+    Given a list of lines, transforms digits into letters for each line
     """
-    new_puzzle = []
-    for line in puzzle:
-        new_puzzle.append(modifiy_line(line))
-    return new_puzzle
+    return [modify_line(line) for line in lines]
 
-def modifiy_line(line):
+def modify_line(line):
     """
     Given a line, eightwothree -> 823
     """
-    new_line = line[:]
     for word, digit in DIGITS.items():
-        new_line = new_line.replace(word, word[0] + digit + word[-1])
-    return new_line
+        # in "eightwothree", replacing "two" with "2" leads to "eigh2three", "eight" can't be found now 
+        # fix: replace "two" with "t2o", "three" with "t3e" etc
+        line = line.replace(word, word[0] + digit + word[-1])  
+    return line
     
 def get_calibration_value(line):
     """
     Returns the calibration value for each line
     """
     calibration_value = [value for value in line if value.isdigit()]
-    return int(calibration_value[0] + calibration_value[-1])
+    return int(calibration_value[0] + calibration_value[-1]) # "th7th" should give us 77
 
 def get_sum_calibration_value(lines):
     """
