@@ -39,9 +39,9 @@ def get_sum_calibration_value(lines):
     return sum([get_calibration_value(line) for line in lines])
 
 # part a
-puzzle_input = get_puzzle_input(r"./input/puzzle_input.txt")
+puzzle_input = get_puzzle_input(r"./puzzle_input.txt")
 print(get_sum_calibration_value(puzzle_input))
 
 # part b
-puzzle_input = modify_input(get_puzzle_input(r"./input/puzzle_input.txt"))
+puzzle_input = modify_input(get_puzzle_input(r"./puzzle_input.txt"))
 print(get_sum_calibration_value(puzzle_input))
