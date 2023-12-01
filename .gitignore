@@ -1,1 +1,3 @@
-input/*
+# Ignore all files named puzzle_input.txt or input.txt in any directory
+**/puzzle_input.txt
+**/input.txt
