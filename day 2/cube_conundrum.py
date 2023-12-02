@@ -1,10 +1,11 @@
 from collections import defaultdict
+from functools import reduce
 
 MAXIMUM = {"red": 12, "green": 13, "blue": 14}
 
 def get_puzzle_input(directory):
     """
-    Given a directory, returns a list of games, where a game is a list of sets, and a set is a dictionary like MAXIMUM
+    Given a directory, returns a list of games, where a game is a dictionary like MAXIMUM
     """
     with open(directory) as f:
         lines = f.readlines()
@@ -14,28 +15,21 @@ def get_puzzle_input(directory):
 
 def get_formatted_game(game):
     """
-    Given a game ('3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green'), returns a list of sets, and a set is a dictionary like MAXIMUM
+    Given a game ('3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green'), returns a dictionary like MAXIMUM
+    of maximum balls picked of each color
     """
-    game = game.split("; ")
-    return [get_formatted_set(set) for set in game]
-
-def get_formatted_set(set):
-    """
-    Given a set, returns it in a representation like MAXIMUM
-    """
-    set = set.split(", ")
-    formatted_set = defaultdict(int)
-    for pick in set:
+    game = game.replace("; ", ", ").split(", ")
+    formatted_game = defaultdict(lambda: 0)
+    for pick in game:
         pick = pick.split()
-        formatted_set[pick[1]] = int(pick[0])
-    return formatted_set
+        formatted_game[pick[1]] = max(formatted_game[pick[1]], int(pick[0]))
+    return formatted_game
 
 def sum_of_gameid(games):
-    ans_a = 0
-    ans_b = 0
-    for index, game in enumerate(games, start=1):
+    ans_a, ans_b = 0, 0
+    for id, game in enumerate(games, start=1):
         if is_possible(game):
-            ans_a += index
+            ans_a += id
         ans_b += lowest_possible(game)
     return ans_a, ans_b
 
@@ -43,20 +37,13 @@ def is_possible(game):
     """
     Returns whether a particular game is possible given the maximum balls available
     """
-    for set in game:
-        for color in MAXIMUM:
-            if MAXIMUM[color] < set[color]:
-                return False
-    return True
+    return all([MAXIMUM[color] >= game[color] for color in MAXIMUM])
 
 def lowest_possible(game):
     """
     Returns the minimum "power" of balls required to play a game
     """
-    power = 1
-    for color in MAXIMUM:
-        power *= max([set[color] for set in game])
-    return power
+    return reduce(lambda x, y: x * y, game.values())
 
 games = get_puzzle_input(r"./puzzle_input.txt")
 print(sum_of_gameid(games))  # (part a, part b)
