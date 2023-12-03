@@ -1,12 +1,10 @@
 from collections import defaultdict
-from functools import reduce
+from math import prod
 
 def parse_puzzle_input(directory):
-    with open(directory) as f:
-        lines = f.read().split("\n")
-    
-    for line_num, line in enumerate(lines):
-        parse_line(line + ".", line_num)
+    with open(directory) as file:    
+        for line_num, line in enumerate(file):
+            parse_line(line + ".", line_num)
 
 def parse_line(line, line_num):
     current_number = ""
@@ -20,7 +18,7 @@ def parse_line(line, line_num):
         if char != "." and not(char.isdigit()):
             SYMBOLS.add((x, line_num))
         if char == "*":
-            STARS.add((x, line_num))
+            STARS[(x, line_num)] = set()  
 
 def check_part_number(number, coordinate):
     start_x, end_x, y = coordinate
@@ -48,15 +46,14 @@ def get_gear_ratio():
     sum = 0
     for adjacent in STARS.values():
         if len(adjacent) == 2:
-            sum += reduce(lambda x, y: x * y, adjacent)
+            sum += prod(adjacent)
     return sum
 
 NUMBERS = defaultdict(list)  # "34": [(start_x, end_x, y), (start_x, end_x, y)]
 SYMBOLS = set()  # {(x, y), (x, y)}
-STARS = set()    # {(x, y), (x, y)}
+STARS = dict()    # {(x, y): set()}
 
 parse_puzzle_input(r"./puzzle_input.txt")   # assign values to NUMBERS, SYMBOLS, STARS 
-STARS = {star: set() for star in STARS} 
 
 print(sum_part_numbers(NUMBERS))
 print(get_gear_ratio())
