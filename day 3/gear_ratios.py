@@ -1,48 +1,26 @@
 from collections import defaultdict
 from functools import reduce
 
-def get_puzzle_input(directory):
-    NUMBERS = defaultdict(list)  # "34": [(start_x, end_x, y), (start_x, end_x, y)]
-    SYMBOLS = set()  # {(x, y), (x, y)}
-    STARS = set()
-
+def parse_puzzle_input(directory):
     with open(directory) as f:
         lines = f.read().split("\n")
     
     for line_num, line in enumerate(lines):
-        numbers, symbols, stars = parse_line(line, line_num)
-        SYMBOLS = SYMBOLS.union(symbols)
-        STARS = STARS.union(stars)
-        NUMBERS = update_numbers(NUMBERS, numbers)
-
-    return NUMBERS, SYMBOLS, STARS
-
-def update_numbers(NUMBERS, numbers):
-    for number in numbers:
-        NUMBERS[number].extend(numbers[number])
-    return NUMBERS
+        parse_line(line + ".", line_num)
 
 def parse_line(line, line_num):
-    numbers = defaultdict(list)
-    symbols = set()
-    stars = set()
-
     current_number = ""
     for x, char in enumerate(line):
         if char.isdigit():
             current_number += char
         elif current_number:
-            numbers[current_number].append([x - len(current_number), x - 1, line_num])
+            NUMBERS[current_number].append([x - len(current_number), x - 1, line_num])
             current_number = ""
 
         if char != "." and not(char.isdigit()):
-            symbols.add((x, line_num))
+            SYMBOLS.add((x, line_num))
         if char == "*":
-            stars.add((x, line_num))
-
-    if current_number:
-        numbers[current_number].append([len(line) - len(current_number) - 1, len(line) - 2, line_num])
-    return numbers, symbols, stars
+            STARS.add((x, line_num))
 
 def check_part_number(number, coordinate):
     start_x, end_x, y = coordinate
@@ -54,20 +32,16 @@ def check_part_number(number, coordinate):
     
     for adjacent_cell in adjacent_cells:
         if adjacent_cell in SYMBOLS:
-            return True
-    return False
+            return 1
+    return 0
         
-def check_part_numbers(number, coordinates):
-    occurance = 0
-    for coordinate in coordinates:
-        if check_part_number(number, coordinate):
-            occurance += 1
-    return occurance
+def check_part_numbers(coordinates, number):
+    return sum([check_part_number(number, coordinate) for coordinate in coordinates])
 
 def sum_part_numbers(NUMBERS):
     sum = 0
     for number, coordinates in NUMBERS.items():
-        sum += int(number) * check_part_numbers(number, coordinates) 
+        sum += int(number) * check_part_numbers(coordinates, number) 
     return sum
 
 def get_gear_ratio():
@@ -77,7 +51,12 @@ def get_gear_ratio():
             sum += reduce(lambda x, y: x * y, adjacent)
     return sum
 
-NUMBERS, SYMBOLS, STARS = get_puzzle_input(r"./puzzle_input.txt")
-STARS = {star: set() for star in STARS}
+NUMBERS = defaultdict(list)  # "34": [(start_x, end_x, y), (start_x, end_x, y)]
+SYMBOLS = set()  # {(x, y), (x, y)}
+STARS = set()    # {(x, y), (x, y)}
+
+parse_puzzle_input(r"./puzzle_input.txt")   # assign values to NUMBERS, SYMBOLS, STARS 
+STARS = {star: set() for star in STARS} 
+
 print(sum_part_numbers(NUMBERS))
 print(get_gear_ratio())
