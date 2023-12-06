@@ -28,4 +28,36 @@ RACES = get_puzzle_input(r"./puzzle_input.txt")
 print(get_total_ways(RACES))
 print(get_total_ways(modify_input(RACES)))
 
+"""
+time = 15
+distance = 40
+
+hold: 0     15 * 0   = distance
+            14 * 1
+            13 * 2
+            12 * 3  (note)
+            11 * 4  
+            10 * 5
+            9  * 6
+            8  * 7
+            7  * 8
+            6  * 9
+            5  * 10
+            4  * 11   (note)
+            3  * 12
+            2  * 13
+            1  * 14
+            0  * 15
+
+(h) * (t - h) > distance
+h**2 - ht + d < 0
+h**2 - 15 h + 40 = 0   (3.46, 11.53)
+
+
+(time + 1) - 2 * (hold + 1)
+"""
+
+
+
+
 
