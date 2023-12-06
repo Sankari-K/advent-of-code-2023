@@ -14,12 +14,7 @@ def modify_input(races):
     return races
 
 def get_ways(time, distance):
-    lesser = 0
-    for holding_time in range(0, time + 1):
-        lesser += 1
-        if holding_time * (time - holding_time) > distance:
-            lesser -= 1
-            break
+    lesser = (time - sqrt(time ** 2 - 4 * distance)) // 2 + 1
     return (time + 1) - 2 * (lesser)
 
 def get_total_ways(RACES):
