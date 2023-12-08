@@ -1,4 +1,5 @@
-from math import gcd
+import re
+import math
 
 def get_puzzle_input(directory):
     with open(directory) as file: 
@@ -6,43 +7,41 @@ def get_puzzle_input(directory):
 
     directions = file[0]
     adj_list = dict()
-    for node in file[2:]:
-        node, neighbors = node.split(" = ")
-        neighbors = neighbors[1:-1].split(", ")
-        adj_list[node] = neighbors
+    for line in file[2:]:
+        node, left, right = re.findall("[1-9A-Z]+", line)
+        adj_list[node] = [left, right]
     return directions, adj_list
 
 def get_frequency(node, directions, adj_list):
     steps = 0
     current_direction = 0
-    observed_ends = []
 
-    while len(observed_ends) != 2:
-        if node[-1] == "Z":
-            observed_ends.append(steps)
+    while not node.endswith("Z"):
         if directions[current_direction] == "L":
             node = adj_list[node][0]
         else:
             node = adj_list[node][1]
         current_direction = (current_direction + 1) % len(directions)
         steps += 1
+    return steps
         
-    return {"first occurence": observed_ends[0], "frequency": observed_ends[-1] - observed_ends[0]}
-
 def find_simultaneous_steps(directions, adj_list):
     frequencies = []
-    for node in [node for node in adj_list if node[-1] == "A"]:
-        frequencies.append(get_frequency(node, directions, adj_list)["frequency"])
-    return find_lcm(frequencies)
-
-def find_lcm(array):
-    lcm = 1
-    for a in array:
-        lcm = lcm * a // gcd(lcm, a)
-    return lcm
+    for node in [node for node in adj_list if node.endswith("A")]:
+        frequencies.append(get_frequency(node, directions, adj_list))
+    return math.lcm(*frequencies)
 
 directions, adj_list = get_puzzle_input(r"./puzzle_input.txt")
 
-print(get_frequency("AAA", directions, adj_list)["first occurence"])
+print(get_frequency("AAA", directions, adj_list))
 print(find_simultaneous_steps(directions, adj_list))
 
+"""
+The length of ..A -> ..Z is a multiple of pattern length.
+
+No other ..Z nodes exist between the ..Z -> ..Z path, which always has the same start and end node.
+
+The length of ..Z -> ..Z is a multiple of pattern length.
+
+For all pairs, ..A -> ..Z and ..Z -> ..Z are the same.
+"""
