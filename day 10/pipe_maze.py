@@ -1,3 +1,5 @@
+from matplotlib.path import Path
+
 def get_puzzle_input(directory):
     MAZE = dict()
     START = tuple()
@@ -61,26 +63,15 @@ def get_furthest_steps(START):
 
 def get_area_enclosed(START):
     path = get_loop(START)
+    poly = Path(path)
     area_enclosed = 0
     for x_coordinate in range(MAX_X):
-        is_outside = True
-        prev = ""
         for y_coordinate in range(MAX_Y):
-            if (x_coordinate, y_coordinate) in path:
-                if MAZE[(x_coordinate, y_coordinate)] == "|":
-                    is_outside = not is_outside
-                elif MAZE[(x_coordinate, y_coordinate)] == "J" and prev == "F":
-                    is_outside = not is_outside
-                elif MAZE[(x_coordinate, y_coordinate)] == "7" and prev == "L":
-                    is_outside = not is_outside
-                
-                if MAZE[(x_coordinate, y_coordinate)] != "-":
-                    prev = MAZE[(x_coordinate, y_coordinate)]
-            else:
-                if not is_outside:
-                    area_enclosed += 1
+                if (x_coordinate, y_coordinate) not in path:
+                    if poly.contains_point((x_coordinate, y_coordinate)):
+                        area_enclosed += 1
     return area_enclosed
     
 MAZE, START, MAX_X, MAX_Y = get_puzzle_input(r"./puzzle_input.txt")
-# print(get_furthest_steps(START))
+print(get_furthest_steps(START))
 print(get_area_enclosed(START))
