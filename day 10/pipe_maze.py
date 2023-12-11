@@ -2,11 +2,9 @@ from matplotlib.path import Path
 
 def get_puzzle_input(directory):
     MAZE = dict()
-    START = tuple()
     with open(directory) as file: 
         file = file.read().split("\n")
-        MAX_X = len(file)
-        MAX_Y = len(file[0])
+        MAX_X, MAX_Y = len(file), len(file[0])
         for x_coordinate, line in enumerate(file):
             for y_coordinate, pipe in enumerate(line.strip()):
                 MAZE[(x_coordinate, y_coordinate)] = pipe
@@ -18,39 +16,42 @@ def get_path(path, x, y):
     while path and (x, y) != START:
         previous = path[-1]
         path.append((x, y))
-        # if we're coming from the left: can move only if "-", "J", "7"
-        if previous == (x, y - 1):
-            if MAZE[(x, y)] == "-":
-                (x, y) = (x, y + 1)
-            elif MAZE[(x, y)] == "J":
-                (x, y) = (x - 1, y)
-            elif MAZE[(x, y)] == "7":
-                (x, y) = (x + 1, y)
-        # if we're coming from the right: can move only if "-", "L", "F"
-        elif previous == (x, y + 1):
-            if MAZE[(x, y)] == "-":
-                (x, y) = (x, y - 1)
-            elif MAZE[(x, y)] == "L":
-                (x, y) = (x - 1, y)
-            elif MAZE[(x, y)] == "F":
-                (x, y) = (x + 1, y)
-        # if we're coming from the top: can move only if "|", "L", "J"
-        elif previous == (x - 1, y):
-            if MAZE[(x, y)] == "|":
-                (x, y) =  (x + 1, y)
-            elif MAZE[(x, y)] == "L":
-                (x, y) = (x, y + 1)
-            elif MAZE[(x, y)] == "J":
-                (x, y) = (x, y - 1)
-        # if we're coming from the bottom: can move only if "|", "7", "F"
-        else:
-            if MAZE[(x, y)] == "|":
-                (x, y) = (x - 1, y)
-            elif MAZE[(x, y)] == "7":
-                (x, y) = (x, y - 1)
-            elif MAZE[(x, y)] == "F":
-                (x, y) = (x, y + 1)
+        (x, y) = get_next_pipe(x, y, previous)
     return path
+
+def get_next_pipe(x, y, previous):
+    # if we're coming from the left: can move only if "-", "J", "7"
+    if previous == (x, y - 1):
+        if MAZE[(x, y)] == "-":
+            return (x, y + 1)
+        elif MAZE[(x, y)] == "J":
+            return (x - 1, y)
+        elif MAZE[(x, y)] == "7":
+            return (x + 1, y)
+    # if we're coming from the right: can move only if "-", "L", "F"
+    elif previous == (x, y + 1):
+        if MAZE[(x, y)] == "-":
+            return (x, y - 1)
+        elif MAZE[(x, y)] == "L":
+            return (x - 1, y)
+        elif MAZE[(x, y)] == "F":
+            return (x + 1, y)
+    # if we're coming from the top: can move only if "|", "L", "J"
+    elif previous == (x - 1, y):
+        if MAZE[(x, y)] == "|":
+            return (x + 1, y)
+        elif MAZE[(x, y)] == "L":
+            return (x, y + 1)
+        elif MAZE[(x, y)] == "J":
+            return (x, y - 1)
+    # if we're coming from the bottom: can move only if "|", "7", "F"
+    else:
+        if MAZE[(x, y)] == "|":
+            return (x - 1, y)
+        elif MAZE[(x, y)] == "7":
+            return (x, y - 1)
+        elif MAZE[(x, y)] == "F":
+            return (x, y + 1)
 
 def get_loop(START):
     if MAZE[(START[0] + 1, START[1])] in "|LJ":
