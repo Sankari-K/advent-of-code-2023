@@ -11,36 +11,34 @@ def get_puzzle_input(directory):
 
 def modify_springs(springs):
     for index, spring in enumerate(springs):
-        springs[index][0] = ((spring[0] + "?") * 5)[:-1]
+        springs[index][0] = "?".join([spring[0]] * 5)
         springs[index][1] = spring[1] * 5
     return springs
 
 @lru_cache
-def get_arrangement(spring_pos, current_pos, matched_damaged_count, current_damaged_count):
+def get_arrangement(spring_pos, current_pos, matched_damaged_index, current_damaged_count):
     spring, schema = SPRINGS[spring_pos][0] + ".", SPRINGS[spring_pos][1]
     # base case
     if current_pos == len(spring):
-        if matched_damaged_count == len(schema):
+        if matched_damaged_index == len(schema):
             return 1 if current_damaged_count == 0 else 0
         return 0
     # conditions to exit early
-    if matched_damaged_count == len(schema):
+    if matched_damaged_index == len(schema):
         if current_damaged_count != 0 or "#" in spring[current_pos:]:
             return 0
         return 1
-    if matched_damaged_count > len(schema):
-        return 0
-    if current_damaged_count > schema[matched_damaged_count]:
+    if current_damaged_count > schema[matched_damaged_index]:
         return 0 
     # recursive case
     ans = 0
     if spring[current_pos] in "#?":
-        ans += get_arrangement(spring_pos, current_pos + 1, matched_damaged_count, current_damaged_count + 1)
+        ans += get_arrangement(spring_pos, current_pos + 1, matched_damaged_index, current_damaged_count + 1)
     if spring[current_pos] in ".?":
-        if current_damaged_count != 0 and schema[matched_damaged_count] == current_damaged_count:
-            ans += get_arrangement(spring_pos, current_pos + 1, matched_damaged_count + 1, 0)
+        if schema[matched_damaged_index] == current_damaged_count:
+            ans += get_arrangement(spring_pos, current_pos + 1, matched_damaged_index + 1, 0)
         elif current_damaged_count == 0:
-            ans += get_arrangement(spring_pos, current_pos + 1, matched_damaged_count, current_damaged_count)
+            ans += get_arrangement(spring_pos, current_pos + 1, matched_damaged_index, current_damaged_count)
     return ans
 
 def get_sum_arrangements(SPRINGS):
