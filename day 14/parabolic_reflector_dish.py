@@ -38,7 +38,7 @@ def tilt_platform(platform, direction):
     elif direction == "east":
         platform = [i[::-1] for i in platform]
     return platform
-        
+
 def find_pattern(platform, cycle):
     platforms = list()
     while platform not in platforms:
@@ -47,6 +47,7 @@ def find_pattern(platform, cycle):
         platform = tilt_platform(platform, "west") # west
         platform = tilt_platform(platform, "south") # south
         platform = tilt_platform(platform, "east") # east
+
         
     indices = [i for i in range(len(platforms))]
     while indices.count(indices[-1]) != 3:
@@ -66,7 +67,6 @@ def get_north_load(platform):
     return get_load(tilt_platform(platform, "north"))
 
 platform = get_puzzle_input(r"./puzzle_input.txt")
-# print(get_north_load(platform)) # part a
 
+print(get_north_load(platform)) # part a
 print(get_load(find_pattern(platform, 1000000000)))
-
