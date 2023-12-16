@@ -6,6 +6,19 @@ DIRECTIONS = {"-": {"T": ["L", "R"], "D": ["L", "R"], "L": ["R"], "R": ["L"]},
               "/": {"T": ["L"], "D": ["R"], "L": ["T"], "R": ["D"]},
               "\\": {"T": ["R"], "D": ["L"], "L": ["D"], "R": ["T"]}}
 
+def get_puzzle_input(directory):
+    with open(directory) as file:
+        file = file.read().split() 
+
+    LAYOUT = dict()
+    MAX_X = len(file)   
+    MAX_Y = len(file[0])
+
+    for x, line in enumerate(file):
+        for y, char in enumerate(line):
+            LAYOUT[(x, y)] = char
+    return LAYOUT, MAX_X, MAX_Y
+
 def get_relative_direction(prev, current):
     x, y = current
     if prev == (x, y - 1):
@@ -25,18 +38,6 @@ def get_absolute_direction(current, direction):
     if direction == "L":
         return (x, y - 1)
     return (x, y + 1)
-
-def get_puzzle_input(directory):
-    LAYOUT = dict()
-    MAX_X = MAX_Y = 0
-    with open(directory) as file:
-        file = file.read().split()       
-        MAX_X = len(file)              
-        for x, line in enumerate(file):
-            MAX_Y = len(line)
-            for y, char in enumerate(line):
-                LAYOUT[(x, y)] = char
-    return LAYOUT, MAX_X, MAX_Y
 
 def get_energized_tiles(prev, current):
     queue = deque()
@@ -65,5 +66,5 @@ def get_max_energized_tiles(MAX_X, MAX_Y):
     return max_tiles
 
 LAYOUT, MAX_X, MAX_Y = get_puzzle_input(r"./puzzle_input.txt")
-print(get_energized_tiles((0, -1), (0, 0))) 
+print(get_energized_tiles(prev=(0, -1), current=(0, 0))) 
 print(get_max_energized_tiles(MAX_X, MAX_Y))
