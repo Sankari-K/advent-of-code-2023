@@ -1,6 +1,8 @@
 import heapq
 
 DIRECTIONS = ["T", "D", "L", "R"]
+NEXT = {"T": lambda x, y: (x - 1, y), "D": lambda x, y: (x + 1, y), "L": lambda x, y: (x, y - 1), "R": lambda x, y: (x, y + 1)}
+RELATIVE_DIRECTION = {(0, -1): "R", (0, 1): "L", (-1, 0): "D", (1, 0): "T"}
 
 def get_puzzle_input(directory):
     with open(directory) as file:
@@ -15,29 +17,9 @@ def get_puzzle_input(directory):
             CITY[(x, y)] = int(char)
     return CITY, MAX_X, MAX_Y
 
-def get_next(current, direction):
-    x, y = current  
-    if direction == "T":
-        return (x - 1, y)
-    if direction == "D":
-        return (x + 1, y)
-    if direction == "L":
-        return (x, y - 1)
-    return (x, y + 1)
-
-def get_relative_direction(prev, current):
-    x, y = current
-    if prev == (x, y - 1):
-        return "R"
-    if prev == (x, y + 1):
-        return "L"
-    if prev == (x - 1, y):
-        return "D"
-    return "T"
-
-def get_min_heat_loss(min_direction, max_direction):
+def get_min_heat_loss(min_steps, max_steps):
     seen = set()
-    queue = [(0, (0, 1), (0, 0), 1), (0, (1, 0), (0, 0), 1)]
+    queue = [(0, (0, 1), (0, 0), 1), (0, (1, 0), (0, 0), 1)]  # [(loss, current, prev, direction_steps)]
 
     while queue:
         loss, current, prev, direction_steps = heapq.heappop(queue)
@@ -53,14 +35,15 @@ def get_min_heat_loss(min_direction, max_direction):
         seen.add((prev, current, direction_steps))
     
         for direction in DIRECTIONS:
-            next = get_next(current, direction)
+            next = NEXT[direction](*current)
+            prev_direction = RELATIVE_DIRECTION[(prev[0] - current[0], prev[1] - current[1])]
 
             if next == prev:
                 continue
-
-            if direction == get_relative_direction(prev, current) and direction_steps < max_direction:
+            
+            if direction == prev_direction and direction_steps < max_steps:
                 heapq.heappush(queue, (loss + CITY[current], next, current, direction_steps + 1))
-            elif direction != get_relative_direction(prev, current) and direction_steps >= min_direction:
+            elif direction != prev_direction and direction_steps >= min_steps:
                 heapq.heappush(queue, (loss + CITY[current], next, current, 1))
   
 CITY, MAX_X, MAX_Y = get_puzzle_input(r"./puzzle_input.txt")
