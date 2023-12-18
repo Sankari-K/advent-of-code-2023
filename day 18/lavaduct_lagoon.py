@@ -5,15 +5,14 @@ def get_puzzle_input(directory):
     with open(directory) as file:
         return [line.strip().split() for line in file]
     
-def modify_dig_plan(DIG_PLAN, part):
-    if part == "a":
+def modify_dig_plan(DIG_PLAN, modify):
+    if not modify:
         return [[direction, steps] for direction, steps, color in DIG_PLAN]
     
     for index, plan in enumerate(DIG_PLAN):
-        hexdecimal = plan[-1][1:-1][1:]
-        DIG_PLAN[index] = [DIRECTION[hexdecimal[-1]], int(hexdecimal[:-1], 16)]
+        hexdecimal = plan[-1].removeprefix("(#").removesuffix(")")
+        DIG_PLAN[index] = [DIRECTION[hexdecimal[-1]], int(hexdecimal[:-1], 16)] # [[direction0, steps0], [direction1, steps1]]
     return DIG_PLAN
-
 
 def dig_boundary(DIG_PLAN):
     current = (0, 0)
@@ -36,8 +35,8 @@ def get_lava_capacity(path):
     interior_pts = area + 1 - path_pts // 2
     return interior_pts + path_pts
 
-DIG_PLAN = modify_dig_plan(get_puzzle_input(r"./puzzle_input.txt"), "a")
+DIG_PLAN = modify_dig_plan(get_puzzle_input(r"./puzzle_input.txt"), modify=False)
 print(get_lava_capacity(dig_boundary(DIG_PLAN)))
 
-DIG_PLAN = modify_dig_plan(get_puzzle_input(r"./puzzle_input.txt"), "b")
+DIG_PLAN = modify_dig_plan(get_puzzle_input(r"./puzzle_input.txt"), modify=True)
 print(get_lava_capacity(dig_boundary(DIG_PLAN)))
