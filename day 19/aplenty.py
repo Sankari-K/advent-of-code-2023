@@ -2,7 +2,7 @@ from collections import defaultdict
 
 def get_puzzle_input(directory):
     with open(directory) as file:
-        raw_workflows, raw_parts = file = file.read().split("\n\n")
+        raw_workflows, raw_parts = file.read().split("\n\n")
     WORKFLOWS = parse_workflows(raw_workflows.split("\n"))
     PARTS = parse_parts(raw_parts.split("\n"))
     return WORKFLOWS, PARTS
