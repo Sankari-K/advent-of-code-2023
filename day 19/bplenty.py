@@ -2,6 +2,11 @@ from collections import defaultdict
 from functools import reduce
 import copy 
 
+GET_SET = {(">", False): lambda number: set(range(number + 1, 4001)),
+           (">", True): lambda number: set(range(1, number + 1)),
+           ("<", False): lambda number: set(range(1, number)),
+           ("<", True): lambda number: set(range(number, 4001))}
+
 def get_puzzle_input(directory):
     with open(directory) as file:
         raw_workflows = file.read().split("\n\n")[0]
@@ -21,26 +26,17 @@ def get_intersection(prev_set, variable, new_set):
     return prev_set
 
 def get_set(condition, invert):
-    if ">" in condition and not invert:
+    if ">" in condition:
         variable, number = condition.split(">")
-        number = int(number)
-        return variable, set(range(number + 1, 4001))
-    elif ">" in condition and invert:
-        variable, number = condition.split(">")
-        number = int(number)
-        return variable, set(range(1, number + 1))
-    elif "<" in condition and not invert:
+        return variable, GET_SET[">", invert](int(number))
+   
+    elif "<" in condition:
         variable, number = condition.split("<")
-        number = int(number)
-        return variable, set(range(1, number))
-    else:
-        variable, number = condition.split("<")
-        number = int(number)
-        return variable, set(range(number, 4001))
+        return variable, GET_SET["<", invert](int(number))
 
 def dfs(node, prev_ranges):
     if node == "A":
-        return reduce(lambda x, y: x * y, [len(range) for range in prev_ranges.values()])
+        return reduce(lambda x, y: x * y, list(map(len, prev_ranges.values())))
     
     ans = 0
     for conditions in WORKFLOWS[node]:
@@ -56,6 +52,6 @@ def dfs(node, prev_ranges):
 def get_total_ways():
     return dfs("in", {"x": set(range(1, 4001)), "m": set(range(1, 4001)), "a": set(range(1, 4001)), "s": set(range(1, 4001))})
 
-WORKFLOWS = get_puzzle_input(r"./puzzle_input.txt")
+WORKFLOWS = get_puzzle_input(r"./input.txt")
+print(WORKFLOWS)
 print(get_total_ways())
-
