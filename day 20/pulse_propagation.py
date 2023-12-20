@@ -42,11 +42,11 @@ class Conjunction:
         self.name = name
         self.destination = destination
     
-    def refresh(self):
-        self.current_status = {s: "low" for s in self.current_status}
-
     def set_inputs(self, inputs):
         self.current_status = {d: "low" for d in inputs}
+    
+    def refresh(self):
+        self.current_status = {s: "low" for s in self.current_status}
 
     def receive_pulse(self, source, pulse_type):
         self.current_status[source] = pulse_type
