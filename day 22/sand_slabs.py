@@ -6,12 +6,10 @@ def get_puzzle_input(directory):
     
     BRICKS = dict()
     MAX_DIMENSIONS = [-1, -1, -1]
-
     for index, line in enumerate(file):
         old, new = line.strip().split("~")
         old = list(map(int, old.split(",")))
         new = list(map(int, new.split(",")))
-
         for x in range(old[0], new[0] + 1):
             for y in range(old[1], new[1] + 1):
                 for z in range(old[2], new[2] + 1):
@@ -30,7 +28,7 @@ def get_all_coordinates(brick_id):
     return coordinates
 
 def simulate_entire_fall(BRICKS, MAX_Z):
-    for level in range(1, MAX_Z + 1): # find all brick types in that level
+    for level in range(1, MAX_Z + 1): # find all brick types on that level
         for brick in get_bricks_given_height(level):
             simulate_fall_brick(brick, level)
     return BRICKS
@@ -43,10 +41,12 @@ def simulate_fall_brick(brick, level):
     while all([(level - lower >= 1) and ((coordinate[0], coordinate[1], level - lower) not in BRICKS) for coordinate in xyplane]):
         lower += 1
     lower -= 1
-
+    
+    new_coordinates = [(coordinate[0], coordinate[1], coordinate[2] - lower) for coordinate in coordinates]
     for coordinate in coordinates:
         del BRICKS[coordinate]
-        BRICKS[(coordinate[0], coordinate[1], coordinate[2] - lower)] = brick
+    for coordinate in new_coordinates:
+        BRICKS[coordinate] = brick
 
 def get_support_stats(BRICKS):
     support_stats = defaultdict(set)
@@ -76,7 +76,11 @@ def get_brick_score(brick):
 
     while queue:
         next_brick = queue.popleft()
-        other_values = set([s for brick, supports in SUPPORT_STATS.items() for s in supports if brick not in seen])
+
+        other_values = []
+        for brick, supports in SUPPORT_STATS.items():
+            if brick not in seen:
+                other_values.extend(supports)
 
         for support_brick in SUPPORT_STATS[next_brick]:
             if support_brick not in seen and support_brick not in other_values:
@@ -90,10 +94,9 @@ def get_sum_fallen_bricks(support_stats):
         ans += get_brick_score(brick_id)
     return ans
 
-BRICKS, MAX_DIMENSIONS = get_puzzle_input(r"./input.txt")
+BRICKS, MAX_DIMENSIONS = get_puzzle_input(r"./puzzle_input.txt")
 BRICKS = simulate_entire_fall(BRICKS, MAX_DIMENSIONS[-1])
 SUPPORT_STATS = get_support_stats(BRICKS)
 
-print(SUPPORT_STATS)
-# print(get_safe_bricks(SUPPORT_STATS))
+print(get_safe_bricks(SUPPORT_STATS))
 print(get_sum_fallen_bricks(SUPPORT_STATS))
