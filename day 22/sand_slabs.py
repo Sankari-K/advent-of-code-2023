@@ -5,35 +5,33 @@ def get_puzzle_input(directory):
         file = file.read().split("\n")
     
     BRICKS = dict()
-    MAX_DIMENSIONS = [-1, -1, -1]
+    MAX_Z = -1
+
     for index, line in enumerate(file):
         old, new = line.strip().split("~")
         old = list(map(int, old.split(",")))
         new = list(map(int, new.split(",")))
+
         for x in range(old[0], new[0] + 1):
             for y in range(old[1], new[1] + 1):
+                MAX_Z = max(MAX_Z, new[2])
                 for z in range(old[2], new[2] + 1):
                     BRICKS[(x, y, z)] = index
-                    MAX_DIMENSIONS = [max(MAX_DIMENSIONS[0], x), max(MAX_DIMENSIONS[1], y), max(MAX_DIMENSIONS[2], z)]
-    return BRICKS, MAX_DIMENSIONS
+    return BRICKS, MAX_Z
 
 def get_bricks_given_height(z):
-    return set([BRICKS[brick] for brick in BRICKS if brick[2] == z])
+    return set([BRICKS[brick_pos] for brick_pos in BRICKS if brick_pos[2] == z])
 
 def get_all_coordinates(brick_id):
-    coordinates = set()
-    for brick_pos, brick_num in BRICKS.items():
-        if brick_id == brick_num:
-            coordinates.add(brick_pos)
-    return coordinates
-
-def simulate_entire_fall(BRICKS, MAX_Z):
-    for level in range(1, MAX_Z + 1): # find all brick types on that level
+    return set([brick_pos for brick_pos, brick_num in BRICKS.items() if brick_num == brick_id])
+ 
+def simulate_gravity(BRICKS, MAX_Z):
+    for level in range(1, MAX_Z + 1): # find all bricks on that level
         for brick in get_bricks_given_height(level):
-            simulate_fall_brick(brick, level)
+            simulate_brick_fall(brick, level)
     return BRICKS
         
-def simulate_fall_brick(brick, level):
+def simulate_brick_fall(brick, level):
     coordinates = get_all_coordinates(brick)
     xyplane = set([(coordinate[0], coordinate[1]) for coordinate in coordinates])
 
@@ -61,42 +59,34 @@ def get_support_stats(BRICKS):
 
     return support_stats
 
-def get_safe_bricks(support_stats):
-    can_be_disintegrated = 0
-    for brick_id, supporting_bricks in support_stats.items():
-       other_values = set([s for brick, supports in support_stats.items() for s in supports  if brick != brick_id])
-       if len(supporting_bricks) - len(other_values.intersection(set(supporting_bricks))) == 0:
-           can_be_disintegrated += 1
-    
-    return can_be_disintegrated + len(set(BRICKS.values())) - len(support_stats)
-
-def get_brick_score(brick):
-    seen = set([brick])
+def get_other_fallen_bricks(brick):
+    disintegrated_bricks = set([brick])
     queue = deque([brick])
 
     while queue:
         next_brick = queue.popleft()
 
-        other_values = []
+        supported_bricks = []
         for brick, supports in SUPPORT_STATS.items():
-            if brick not in seen:
-                other_values.extend(supports)
+            if brick not in disintegrated_bricks:
+                supported_bricks.extend(supports)
 
-        for support_brick in SUPPORT_STATS[next_brick]:
-            if support_brick not in seen and support_brick not in other_values:
-                seen.add(support_brick)
-                queue.append(support_brick)
-    return len(seen) - 1
+        for brick in SUPPORT_STATS[next_brick]:
+            if brick not in disintegrated_bricks and brick not in supported_bricks:
+                disintegrated_bricks.add(brick)
+                queue.append(brick)
+    return len(disintegrated_bricks) - 1
 
-def get_sum_fallen_bricks(support_stats):
-    ans = 0
-    for brick_id in list(support_stats.keys()):
-        ans += get_brick_score(brick_id)
-    return ans
+def get_inconsequential_bricks(support_stats):
+    inconsequential_bricks = len(set(BRICKS.values())) - len(support_stats)
+    return sum([get_other_fallen_bricks(brick) == 0 for brick in list(support_stats.keys())]) + inconsequential_bricks
 
-BRICKS, MAX_DIMENSIONS = get_puzzle_input(r"./puzzle_input.txt")
-BRICKS = simulate_entire_fall(BRICKS, MAX_DIMENSIONS[-1])
+def get_sum_other_fallen_bricks(support_stats):
+    return sum(map(get_other_fallen_bricks, list(support_stats.keys())))
+   
+BRICKS, MAX_Z = get_puzzle_input(r"./puzzle_input.txt")
+BRICKS = simulate_gravity(BRICKS, MAX_Z)
 SUPPORT_STATS = get_support_stats(BRICKS)
 
-print(get_safe_bricks(SUPPORT_STATS))
-print(get_sum_fallen_bricks(SUPPORT_STATS))
+print(get_inconsequential_bricks(SUPPORT_STATS)) # part a
+print(get_sum_other_fallen_bricks(SUPPORT_STATS)) # part b
