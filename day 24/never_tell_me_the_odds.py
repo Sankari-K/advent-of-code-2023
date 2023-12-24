@@ -13,7 +13,7 @@ def get_puzzle_input(directory):
         HAILSTONES.append([current_pos, speed])
     return HAILSTONES
 
-def do_intersect(a, b):
+def find_intersection(a, b):
     a_coords, a_speed = a
     b_coords, b_speed = b
 
@@ -21,15 +21,20 @@ def do_intersect(a, b):
     eq_x = Eq(a_coords[0] + x * a_speed[0] - b_coords[0] - y * b_speed[0], 0)
     eq_y = Eq(a_coords[1] + x * a_speed[1] - b_coords[1] - y * b_speed[1], 0)
     ans = solve((eq_x,eq_y), (x, y))
-    
-    if ans and (ans[x] >= 0 and ans[y] >= 0) and \
-        (MIN_LIMIT <= a_coords[0] + ans[x] * a_speed[0] <= MAX_LIMIT) and \
-        (MIN_LIMIT <= b_coords[1] + ans[y] * b_speed[1] <= MAX_LIMIT):
-        return 1
-    return 0
+
+    if not ans or (ans[x] < 0) or (ans[y] < 0):
+        return False
+    return a_coords[0] + ans[x] * a_speed[0], b_coords[1] + ans[y] * b_speed[1]
+
 
 def get_total_interactions(HAILSTONES):
-    return sum([do_intersect(hailstone_a, hailstone_b) for hailstone_a, hailstone_b in itertools.combinations(HAILSTONES, 2)])
+    interactions = 0
+    for hailstone_a, hailstone_b in itertools.combinations(HAILSTONES, 2):
+        intersection = find_intersection(hailstone_a, hailstone_b)
+        if intersection and (MIN_LIMIT <= intersection[0] <= MAX_LIMIT) and \
+        (MIN_LIMIT <= intersection[1] <= MAX_LIMIT):
+            interactions += 1
+    return interactions
 
 HAILSTONES = get_puzzle_input(r"./puzzle_input.txt")
 # MIN_LIMIT = 7
