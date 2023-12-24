@@ -8,14 +8,15 @@ def get_puzzle_input(directory):
     MAX_Z = -1
 
     for index, line in enumerate(file):
-        old, new = line.strip().split("~")
-        old = list(map(int, old.split(",")))
-        new = list(map(int, new.split(",")))
+        start, end = line.strip().split("~")
+        start = list(map(int, start.split(",")))
+        end = list(map(int, end.split(",")))
 
-        for x in range(old[0], new[0] + 1):
-            for y in range(old[1], new[1] + 1):
-                MAX_Z = max(MAX_Z, new[2])
-                for z in range(old[2], new[2] + 1):
+        MAX_Z = max(MAX_Z, start[2])
+
+        for x in range(start[0], end[0] + 1):
+            for y in range(start[1], end[1] + 1):
+                for z in range(start[2], end[2] + 1):
                     BRICKS[(x, y, z)] = index
     return BRICKS, MAX_Z
 
