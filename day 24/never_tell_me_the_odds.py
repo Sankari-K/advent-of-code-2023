@@ -54,9 +54,9 @@ def check_possible(velocity, HAILSTONES):
     if not intersection_a:
         return tuple()
     
-    for hailstone_a, hailstone_b in list(itertools.combinations(HAILSTONES, 2))[:10]:
+    for hailstone_a, hailstone_b in list(itertools.combinations(HAILSTONES, 2)):
         new_intersection = find_intersection(hailstone_a, hailstone_b, intersection_a)
-        if new_intersection != intersection_a and not new_intersection:
+        if new_intersection != intersection_a or not new_intersection:
             return tuple()
     
     for index, hailstone in enumerate(HAILSTONES):
@@ -67,17 +67,16 @@ def check_possible(velocity, HAILSTONES):
     if not intersection_b:
         return tuple()
     
-    for hailstone_a, hailstone_b in list(itertools.combinations(HAILSTONES, 2))[:10]:
+    for hailstone_a, hailstone_b in list(itertools.combinations(HAILSTONES, 2)):
         new_intersection = find_intersection(hailstone_a, hailstone_b, intersection_b)
-        if new_intersection != intersection_b and not new_intersection:
+        if new_intersection != intersection_b or not new_intersection:
             return tuple()
     return intersection_a + (intersection_b[0],)
 
 def get_initial_pos():
     # generate all possible velocities and see if all hailstones intersect at a single point in the future (using relative velocity) 
-    ans = check_possible((314, 19, 197), HAILSTONES)
-    if ans:
-        return ans
+    return check_possible((314, 19, 197), HAILSTONES)  # hardcoded after checking some possible ranges of rock velocity
+
 
 HAILSTONES = get_puzzle_input(r"./puzzle_input.txt")
 # MIN_LIMIT = 7
@@ -86,5 +85,5 @@ HAILSTONES = get_puzzle_input(r"./puzzle_input.txt")
 MIN_LIMIT = 200000000000000
 MAX_LIMIT = 400000000000000
 
-# print(get_total_interactions(HAILSTONES))
-print(sum(get_initial_pos()))
+# print(get_total_interactions(HAILSTONES))  # part a
+print(sum(get_initial_pos()))   # part b
